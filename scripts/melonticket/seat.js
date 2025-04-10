@@ -17,7 +17,6 @@ function getConcertId() {
 function openEverySection() {
     let frame = theFrame();
     let section = frame.document.getElementsByClassName("seat_name");
-    console.log(section);
     for (let i = 0; i < section.length; i++) {
         section[i].parentElement.click();
     }
@@ -39,40 +38,55 @@ async function findSeat() {
     let frame = theFrame();
     let canvas = frame.document.getElementById("ez_canvas");
     let seat = canvas.getElementsByTagName("rect");
-    console.log(seat);
-    await sleep(750);
+    
+    await sleep(150);
     for (let i = 0; i < seat.length; i++) {
         let fillColor = seat[i].getAttribute("fill");
     
-        // Check if fill color is different from #DDDDDD or none
         if (fillColor !== "#DDDDDD" && fillColor !== "none") {
             console.log("Rect with different fill color found:", seat[i]);
             var clickEvent = new Event('click', { bubbles: true });
 
             seat[i].dispatchEvent(clickEvent);
             frame.document.getElementById("nextTicketSelection").click();
+            
+            // 保留浏览器通知功能
+            if ("Notification" in window) {
+                if (Notification.permission === "granted") {
+                    let notification = new Notification("提示", {
+                        body: "发现合适的座位，点击切换窗口",
+                        icon: "icon.png"
+                    });
+                    
+                    notification.onclick = () => {
+                        window.focus();
+                    };
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            let notification = new Notification("提示", {
+                                body: "发现合适的座位，点击切换窗口",
+                                icon: "icon.png"
+                            });
+
+                            notification.onclick = () => {
+                                window.focus();
+                            };
+                        }
+                    });
+                }
+            }
+
             return true;
         }
     }
     return false;
 }
 
-async function checkCaptchaFinish() {
-    if (document.getElementById("certification").style.display != "none") {
-        await sleep(1000);
-        checkCaptchaFinish();
-        return;
-    }
-    let frame = theFrame();
-    await sleep(500);
-    frame.document.getElementById("nextTicketSelection").click();
-    return;
-}
-
 async function reload() {
     let frame = theFrame();
     frame.document.getElementById("btnReloadSchedule").click();
-    await sleep(750);
+    await sleep(550);
 }
 
 async function searchSeat(data) {
@@ -80,7 +94,10 @@ async function searchSeat(data) {
         openEverySection();
         clickOnArea(sec);
         if (await findSeat()) {
-            checkCaptchaFinish();
+            // 直接进行下一步操作
+            let frame = theFrame();
+            await sleep(500);
+            frame.document.getElementById("nextTicketSelection").click();
             return;
         }
     }
@@ -91,9 +108,8 @@ async function searchSeat(data) {
 async function waitFirstLoad() {
     let concertId = getConcertId();
     let data = await get_stored_value(concertId);
-    await sleep(1000);
+    await sleep(800);
     searchSeat(data);
 }
-
 
 waitFirstLoad();
