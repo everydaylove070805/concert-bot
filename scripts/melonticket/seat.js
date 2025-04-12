@@ -39,7 +39,7 @@ async function findSeat() {
     let canvas = frame.document.getElementById("ez_canvas");
     let seat = canvas.getElementsByTagName("rect");
     
-    await sleep(150);
+    await sleep(135);
     for (let i = 0; i < seat.length; i++) {
         let fillColor = seat[i].getAttribute("fill");
     
@@ -86,7 +86,7 @@ async function findSeat() {
 async function reload() {
     let frame = theFrame();
     frame.document.getElementById("btnReloadSchedule").click();
-    await sleep(550);
+    await sleep(450);
 }
 
 async function searchSeat(data) {
@@ -96,7 +96,7 @@ async function searchSeat(data) {
         if (await findSeat()) {
             // 直接进行下一步操作
             let frame = theFrame();
-            await sleep(500);
+            await sleep(450);
             frame.document.getElementById("nextTicketSelection").click();
             return;
         }
@@ -108,7 +108,7 @@ async function searchSeat(data) {
 async function waitFirstLoad() {
     let concertId = getConcertId();
     let data = await get_stored_value(concertId);
-    await sleep(800);
+    await sleep(700);
     searchSeat(data);
 }
 
